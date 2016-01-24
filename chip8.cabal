@@ -15,8 +15,11 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
+  exposed-modules:     Chip8
+                     , Chip8.CPU
+                     , Chip8.Display
   build-depends:       base >= 4.7 && < 5
+                     , sdl2
   default-language:    Haskell2010
 
 executable chip8-exe
@@ -33,6 +36,7 @@ test-suite chip8-test
   main-is:             Spec.hs
   build-depends:       base
                      , chip8
+                     , hspec
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
 
