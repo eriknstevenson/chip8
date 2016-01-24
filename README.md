@@ -8,6 +8,8 @@ A Chip-8 interpreter based on the specifications found [here](http://devernay.fr
 
 ## Building
 
+Building is straightforward using [stack](https://github.com/commercialhaskell/stack).
+
     $ git clone https://github.com/narrative/chip8
     $ stack build
 
