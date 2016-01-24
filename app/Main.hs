@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import Chip8
 
 main :: IO ()
-main = someFunc
+main = putStrLn "Chip8 Interpreter"
