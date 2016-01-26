@@ -5,7 +5,7 @@ import Chip8
 
 import Control.Concurrent (threadDelay)
 import Foreign.C.Types
-import Linear
+import qualified Linear as L
 import qualified SDL
 
 screenWidth, screenHeight :: CInt
@@ -15,11 +15,11 @@ main :: IO ()
 main = do
   SDL.initialize [SDL.InitVideo]
 
-  window <- SDL.createWindow "Chip8" SDL.defaultWindow { SDL.windowInitialSize = V2 screenWidth screenHeight }
+  window <- SDL.createWindow "Chip8" SDL.defaultWindow { SDL.windowInitialSize = L.V2 screenWidth screenHeight }
   SDL.showWindow window
 
   screenSurface <- SDL.getWindowSurface window
-  let white = V4 maxBound maxBound maxBound maxBound
+  let white = L.V4 maxBound maxBound maxBound maxBound
   SDL.surfaceFillRect screenSurface Nothing white
   SDL.updateWindowSurface window
 
