@@ -19,6 +19,7 @@ library
                      , Chip8.CPU
                      , Chip8.Display
   build-depends:       base >= 4.7 && < 5
+                     , bytestring
                      , linear
                      , sdl2
                      , text
