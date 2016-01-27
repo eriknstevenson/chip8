@@ -56,8 +56,8 @@ interpret inst = do
       kk = fromIntegral $ inst .&. 0xFF
       nnn = inst .&. 0xFFF
       mem = memory cpu
-      vx = fromIntegral $ mem ! (fromIntegral x)
-      vy = fromIntegral $ mem ! (fromIntegral y)
+      vx = fromIntegral $ mem ! fromIntegral x
+      vy = fromIntegral $ mem ! fromIntegral y
       -- fromIntegral is needed because the stack pointer
       -- is an 8bit value and our memory is addressed
       -- using 16 bits.
@@ -73,7 +73,7 @@ interpret inst = do
         -- |00EE - RET
         -- Return from a subroutine
         0xEE -> do
-          setPC $ stackPointer
+          setPC stackPointer
           decSP
         _ -> liftIO . putStrLn $ "invalid instruction"
     -- |1nnn - JP addr
