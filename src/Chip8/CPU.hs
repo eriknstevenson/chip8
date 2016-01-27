@@ -87,18 +87,17 @@ interpret inst = do
       setPC nnn
     -- |3xkk - SE Vx, byte
     -- Skip next instruction if Vx = kk.
-    0x3 -> when (vx == kk) incPC
+    0x3 -> incPC >> when (vx == kk) incPC
     -- |4xkk - SNE Vx, byte
     -- Skip next instruction if Vx != kk.
-    0x4 -> when (vx /= kk) incPC
+    0x4 -> incPC >> when (vx /= kk) incPC
     -- |5xy0 - SE Vx, Vy
     -- Skip next instruction if Vx = Vy
-    0x5 -> when (vx == vy) incPC
+    0x5 -> incPC >> when (vx == vy) incPC
     -- |6xkk - LD Vx, byte
     -- Set Vx = kk
     0x6 -> return ()
     _ -> liftIO . putStrLn $ "unable to interpret " ++ showHex inst ""
-  incPC
   return ()
 
 pushStack :: Address -> CPU ()
