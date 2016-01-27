@@ -94,6 +94,9 @@ interpret inst = do
     -- |5xy0 - SE Vx, Vy
     -- Skip next instruction if Vx = Vy
     0x5 -> when (vx == vy) incPC
+    -- |6xkk - LD Vx, byte
+    -- Set Vx = kk
+    0x6 -> return ()
     _ -> liftIO . putStrLn $ "unable to interpret " ++ showHex inst ""
   incPC
   return ()
