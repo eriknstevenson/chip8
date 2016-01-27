@@ -33,14 +33,17 @@ testAction = replicateM_ 100 $ do
   --liftIO . putStrLn $ "done."
   return ()
 
-resetCPU :: CPUState
-resetCPU = CPUState
+initCPU :: CPUState
+initCPU = CPUState
   { memory = replicate (4 * 1024) 0x0
   , vRegs = replicate 16 0x0
   , iReg = 0x0
   , pc = initPC
   , sp = 0x0
   }
+
+initPC :: Address
+initPC = 0x200
 
 runCPU :: CPU ()
 runCPU = do
@@ -51,8 +54,8 @@ runCPU = do
 loadProgram :: FilePath -> CPU ()
 loadProgram f = do
   program <- liftIO $ loadFile f
-  let mem = memory resetCPU
-  put $ resetCPU {memory = mem // program}
+  let mem = memory initCPU
+  put $ initCPU {memory = mem // program}
   return ()
     where loadFile f = do
             contents <- liftM BS.unpack $ BS.readFile f
@@ -97,8 +100,9 @@ interpret inst = do
       case kk of
         -- |00E0 - CLS
         -- Clear the display
-        0xE0 -> return ()
-          --TODO
+        0xE0 -> do
+          liftIO . putStrLn $ "CLS not implemented."
+          return ()
         -- |00EE - RET
         -- Return from a subroutine
         0xEE -> do
@@ -156,49 +160,51 @@ interpret inst = do
         1 -> do
           liftIO . putStrLn $ "OR V" ++ showHex x ", V" ++ showHex y ""
           setReg x (vx .|. vy) >> incPC
-        {-
-        2 ->
-        3 ->
-        -}
-        _ -> liftIO . putStrLn $ "invalid instruction " ++ showHex inst ""
+        _ -> error $ "inv inst " ++ showHex inst ""
+    -- |Annn - LD I, addr
+    -- Set I = nnn.
     0xA -> do
       liftIO . putStrLn $ "LD I, " ++ showHex nnn ""
       setI nnn >> incPC
+    -- |Dxyn - DRW Vx, Vy, nibble
+    -- Display n-byte sprite starting at memory location I at
+    -- (Vx, Vy), set VF = collision.
     0xD -> do
       liftIO . putStrLn $ "drawing is not implemented."
       incPC
-    0xF -> case kk of
-             -- |Fx33 - LD B, Vx
-             -- Store BCD representation of Vx in memory locations
-             -- I, I+1, and I+2.
-             0x33 -> do
-               liftIO . putStrLn $ "LD B, V" ++ showHex x ""
-               let bcd = toBCD vx
-                   memoryUpdate = zip [i..] bcd
-               mapM_ (\(loc, val) -> writeWord8 loc val) memoryUpdate
-               incPC
-             -- |Fx55 - LD [I], Vx
-             -- Store registers V0 through Vx in memory starting
-             -- at location I.
-             0x55 -> do
-               liftIO . putStrLn $ "LD [I], V" ++ showHex x ""
-               let loc = map fromIntegral [i..]
-               vals <- mapM (getRegValue) [0..15]
-               let memUpdate = zip loc vals
-               put $ cpu {memory = mem // memUpdate}
-               incPC
-             -- |Fx65 - LD Vx, [I]
-             -- Read registers V0 through Vx from memory starting
-             -- at location I.
-             0x65 -> do
-               liftIO . putStrLn $ "LD V" ++ showHex x ", [I]"
-               let loc = [i..]
-               vals <- mapM (readWord8) loc
-               let vregsUpdate = zip [0..15] vals
-               put $ cpu {vRegs = regs // vregsUpdate }
-               incPC
-             _ -> liftIO . putStrLn $ "unimplemented " ++ showHex inst ""
-    _ -> liftIO . putStrLn $ "unable to interpret " ++ showHex inst ""
+    0xF ->
+      case kk of
+        -- |Fx33 - LD B, Vx
+        -- Store BCD representation of Vx in memory locations
+        -- I, I+1, and I+2.
+        0x33 -> do
+          liftIO . putStrLn $ "LD B, V" ++ showHex x ""
+          let bcd = toBCD vx
+              memoryUpdate = zip [i..] bcd
+          mapM_ (uncurry writeWord8) memoryUpdate
+          incPC
+        -- |Fx55 - LD [I], Vx
+        -- Store registers V0 through Vx in memory starting
+        -- at location I.
+        0x55 -> do
+          liftIO . putStrLn $ "LD [I], V" ++ showHex x ""
+          let loc = map fromIntegral [i..]
+          vals <- mapM getRegValue [0..15]
+          let memUpdate = zip loc vals
+          put $ cpu {memory = mem // memUpdate}
+          incPC
+        -- |Fx65 - LD Vx, [I]
+        -- Read registers V0 through Vx from memory starting
+        -- at location I.
+        0x65 -> do
+          liftIO . putStrLn $ "LD V" ++ showHex x ", [I]"
+          let loc = [i..]
+          vals <- mapM readWord8 loc
+          let vregsUpdate = zip [0..15] vals
+          put $ cpu {vRegs = regs // vregsUpdate }
+          incPC
+        _ -> error $ "unimplemented " ++ showHex inst ""
+    _ -> error $ "unable to interpret " ++ showHex inst ""
   return ()
 
 toBCD :: Word8 -> [Word8]
@@ -215,10 +221,6 @@ popStack :: CPU ()
 popStack = do
   liftIO . putStrLn $ "popStack not implemented."
   return ()
-
-initPC :: Address
-initPC = 0x200
-
 
 modifySP f = do
   cpu <- get
@@ -289,7 +291,7 @@ getSP = do
 readWord8 :: Address -> CPU Word8
 readWord8 addr = do
   mem <- getMem
-  return $ mem ! (fromIntegral addr)
+  return $ mem ! fromIntegral addr
 
 writeWord8 :: Address -> Word8 -> CPU ()
 writeWord8 addr val = do
