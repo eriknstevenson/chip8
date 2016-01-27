@@ -7,6 +7,7 @@ import Control.Concurrent (threadDelay)
 import Foreign.C.Types
 import qualified Linear as L
 import qualified SDL
+import System.Console.GetOpt
 
 screenWidth, screenHeight :: CInt
 (screenWidth, screenHeight) = (640, 320)
