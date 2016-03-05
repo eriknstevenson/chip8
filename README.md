@@ -14,18 +14,16 @@ Building is straightforward using [stack](https://github.com/commercialhaskell/s
     $ cd chip8
     $ stack build
 
-**Building on Windows**
-
-A few extra steps are required to get working on Windows due to the project's  ```sdl2``` dependency.
+**```sdl2``` on Windows**
 
 1. Install [msys2](https://msys2.github.io/)
 2. Open one of the provided ```mingw``` shells.
 3. Update system packages with ```update-core```. You may be prompted to restart the shell following completion of the update.
 4. Install ```pkg-config``` and ```sdl2``` with pacman: ```pacman -S mingw-w64-x86_64-pkg-config mingw-w64-x86_64-SDL2```
 5. Build with stack: ```stack --skip-msys build```
-6. Subsequent builds can be performed from any shell assuming ```sdl2``` has now been built successfully.
+
+Subsequent builds can be performed from any shell assuming ```sdl2``` has now been built successfully.
 
 ## Issues
 
 * Nothing has been implemented yet.
-* This is currently an empty repository.
